@@ -104,7 +104,7 @@ def general_heatmap(dataframe, target_variable):
     # Seleccionar solo columnas numéricas
     numeric_df = dataframe.select_dtypes(include=['float64', 'int64'])
 
-    # con el target convertido a numerico
+    # Si el target es categórico y lo has convertido a 0/1, inclúyelo
     if target_variable in dataframe.columns:
         numeric_df[target_variable] = dataframe[target_variable]
 

@@ -118,3 +118,48 @@ def general_heatmap(dataframe, target_variable):
     plt.title("Heatmap de correlaciones (solo variables numéricas)")
     plt.tight_layout()
     plt.show()
+#--------------------------------------------------------------------------------------------------
+def outliers_analysis (dataframe, target):    
+    numerical_columns = dataframe.select_dtypes(include=['float64', 'int64']).columns
+    numerical_columns = numerical_columns[numerical_columns != target]
+    for column in numerical_columns:
+        fig, axis = plt.subplots(figsize=(8, 1.2))
+        sns.boxplot(ax=axis, data=dataframe, x=column, width=0.3).set(xlabel=None)
+        fig.suptitle(column)
+        plt.tight_layout()
+        plt.show()
+    # Return the describe dataframe    
+    return dataframe.describe().T
+#----------------------------------------------------------------------------------------------------
+def outliers_summary(dataset,outliers):
+    print(f'''the rows with outliers are {len(outliers)}''')
+    print(f'''the total rows are {len(dataset)}''')
+    print(f'''this represents {round(len(outliers)/len(dataset),2)*100} % of the dataset''')
+#-------------------------------------------------------------------------------------
+def small_histogram(dataset, target):
+    # columnas numéricas
+    numeric_variables = dataset.select_dtypes(include=['float64', 'int64']).columns.tolist()
+    # quitar el target si está entre las numéricas
+    numeric_variables = [col for col in numeric_variables if col != target]
+
+    n_vars = len(numeric_variables)
+    n_cols = 3
+    n_rows = math.ceil(n_vars / n_cols)   # las filas que hagan falta
+
+    sns.set(style="whitegrid")
+    fig, axes = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=(5*n_cols, 4*n_rows))
+
+    # convertir axes en array 1D para no liarnos con índices [i//3, i%3]
+    axes = np.array(axes).reshape(-1)
+
+    for i, variable in enumerate(numeric_variables):
+        ax = axes[i]
+        sns.histplot(dataset[variable], bins=20, kde=True, ax=ax)
+        ax.set_title(variable)
+
+    # ocultar ejes vacíos si sobran
+    for j in range(i + 1, len(axes)):
+        axes[j].set_visible(False)
+
+    plt.tight_layout()
+    plt.show()

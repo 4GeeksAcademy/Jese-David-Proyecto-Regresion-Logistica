@@ -3,6 +3,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import math
+from IPython.display import display
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -60,7 +61,63 @@ def plot_categorics_hist(dataframe):
 
     plt.tight_layout()
     plt.show()
-    #----------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------
+
+def analisis_categorico(df, target='y', cat_cols=None, plot=False):
+
+        # Detectar columnas categóricas si no se pasan
+    if cat_cols is None:
+        cat_cols = df.select_dtypes(include='object').columns.tolist()
+    
+    # Quitar el target de la lista de categóricas si está
+    if target in cat_cols:
+        cat_cols = [c for c in cat_cols if c != target]
+
+    print(f"Variables categóricas analizadas: {cat_cols}\n")
+
+    for col in cat_cols:
+        print("\n" + "="*80)
+        print(f"VARIABLE: {col}")
+        print("="*80)
+
+        # ---------- Análisis univariable ----------
+        print("\nDistribución univariable (frecuencia y %):")
+        conteo = df[col].value_counts(dropna=False)
+        porcentaje = df[col].value_counts(normalize=True, dropna=False).mul(100).round(2)
+        resumen = pd.DataFrame({'count': conteo, 'percent_%': porcentaje})
+        display(resumen)
+
+        if plot:
+            conteo.plot(kind='bar')
+            plt.title(f'Distribución de {col}')
+            plt.xlabel(col)
+            plt.ylabel('Frecuencia')
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            plt.show()
+
+        # ---------- Relación con el target (categórica–categórica) ----------
+        if target in df.columns:
+            print(f"\nRelación {col} vs {target} (tabla de contingencia):")
+            tabla = pd.crosstab(df[col], df[target])
+            display(tabla)
+
+            print(f"\nRelación {col} vs {target} (porcentaje por fila):")
+            tabla_pct = pd.crosstab(df[col], df[target],
+                                    normalize='index').mul(100).round(2)
+            display(tabla_pct)
+
+            if plot:
+                tabla_pct.plot(kind='bar', stacked=True)
+                plt.title(f'{col} vs {target} (%)')
+                plt.xlabel(col)
+                plt.ylabel('% dentro de cada categoría de ' + col)
+                plt.xticks(rotation=45)
+                plt.tight_layout()
+                plt.show()
+
+#----------------------------------------------------------------------------------
+
 def plot_scatter_heatmaps(dataframe, target_variable):
     # columnas numéricas
     numeric_variables = dataframe.select_dtypes(include=['float64', 'int64']).columns
